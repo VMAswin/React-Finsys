@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import FinBase from "../FinBase";
 import * as XLSX from "xlsx";
-import { Link, useNavigate } from "react-router-dom";
+import { Await, Link, useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import axios from "axios";
 import config from "../../../functions/config";
@@ -100,7 +100,7 @@ function Vendors () {
     
       const fetchCustomers = () =>{
         axios.get(`${config.base_url}/all_vendors/${ID}/`).then((res)=>{
-          console.log("CUST RES=",res)
+          // console.log("CUST RES=",res)
           if(res.data.status){
             var cust = res.data.vendors;
             setCustomers([])
@@ -132,6 +132,17 @@ function Vendors () {
       function refreshAll(){
         setCustomers([])
         fetchCustomers();
+      }
+      const [vendors , setVendor] = useState([]);
+      const View_Vendor = async (id) =>{
+        try{
+          const response = await axios.post(`${config.base_url}/view_vendor/${id}/`)
+          // setVendor(response.data);
+          // console.log(response.data);
+          navigate('/view_vendor',{state:response.data});
+        } catch (error) {
+          console.log('Error');
+        }
       }
 
     return (
@@ -319,7 +330,8 @@ function Vendors () {
                   <tr
                     className="clickable-row"
                     // onClick={()=>navigate(`/view_vendor/${i.id}/`)}
-                    onClick={()=>navigate('/view_vendor')}
+                    // onClick={()=>navigate('/view_vendor')}
+                    onClick={() => View_Vendor(i.id)}
                     style={{ cursor: "pointer" }}
                   >
                     <td>{index+1}</td>

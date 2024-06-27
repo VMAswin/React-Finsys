@@ -4736,6 +4736,19 @@ def Fin_all_vendors(request,id):
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+@api_view(("POST",))
+# @api_view(['POST'])
+def Fin_view_vendor(request,id):
+    try:
+        vendor = Fin_Vendor.objects.get(id=id)
+        serializer = VendorSerializer(vendor)
+        return Response({"status":True,"vendor":serializer.data}, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
     
 
     

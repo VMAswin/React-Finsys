@@ -96,5 +96,6 @@ urlpatterns = [
 
     path('add_vendor_new/',Fin_add_vendor_new),
     path('all_vendors/<int:id>/',Fin_all_vendors),
+    path('view_vendor/<int:id>/',Fin_view_vendor),
 
 ]
