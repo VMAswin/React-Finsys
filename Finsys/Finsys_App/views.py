@@ -4750,5 +4750,23 @@ def Fin_view_vendor(request,id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
     
+@api_view(("POST",))
+def Fin_change_vendor_status(request,id,sta):
+    try:
+        vendor = Fin_Vendor.objects.get(id=id)
+        if vendor.status == 'Active':
+            vendor.status = sta
+            vendor.save()
+            return Response({"status":True,"message":"Changed"}, status=status.HTTP_200_OK)
+        elif vendor.status == 'Inactive':
+            vendor.status = sta
+            vendor.save()
+            return Response({"status":True,"message":"Changed"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
 
     

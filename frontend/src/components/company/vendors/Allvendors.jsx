@@ -144,6 +144,9 @@ function Vendors () {
           console.log('Error');
         }
       }
+      // const handleclick = (id) =>{
+      //   navigate('/view_vendor',{state:id});
+      // }
 
     return (
         <>
@@ -330,8 +333,9 @@ function Vendors () {
                   <tr
                     className="clickable-row"
                     // onClick={()=>navigate(`/view_vendor/${i.id}/`)}
-                    // onClick={()=>navigate('/view_vendor')}
+                    // onClick={()=>navigate('/view_vendor',{state:i.id})}
                     onClick={() => View_Vendor(i.id)}
+                    // onClick={() => handleclick(i.id)}
                     style={{ cursor: "pointer" }}
                   >
                     <td>{index+1}</td>
