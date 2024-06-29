@@ -134,19 +134,24 @@ function Vendors () {
         fetchCustomers();
       }
       const [vendors , setVendor] = useState([]);
-      const View_Vendor = async (id) =>{
-        try{
-          const response = await axios.post(`${config.base_url}/view_vendor/${id}/`)
-          // setVendor(response.data);
-          // console.log(response.data);
-          navigate('/view_vendor',{state:response.data});
-        } catch (error) {
-          console.log('Error');
-        }
-      }
-      // const handleclick = (id) =>{
-      //   navigate('/view_vendor',{state:id});
+      // const View_Vendor = async (id) =>{
+      //   try{
+      //     const response = await axios.post(`${config.base_url}/view_vendor/${id}/`)
+      //     // setVendor(response.data);
+      //     // console.log(response.data);
+      //     navigate('/view_vendor',{state:response.data});
+      //   } catch (error) {
+      //     console.log('Error');
+      //   }
       // }
+      const handleclick = async (id) =>{
+        try{
+          navigate(`/view_vendor/${id}/`);
+        } catch (error) {
+          console.log('none....')
+        }
+       
+      }
 
     return (
         <>
@@ -334,8 +339,8 @@ function Vendors () {
                     className="clickable-row"
                     // onClick={()=>navigate(`/view_vendor/${i.id}/`)}
                     // onClick={()=>navigate('/view_vendor',{state:i.id})}
-                    onClick={() => View_Vendor(i.id)}
-                    // onClick={() => handleclick(i.id)}
+                    // onClick={() => View_Vendor(i.id)}
+                    onClick={() => handleclick(i.id)}
                     style={{ cursor: "pointer" }}
                   >
                     <td>{index+1}</td>

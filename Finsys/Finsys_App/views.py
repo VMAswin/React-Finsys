@@ -4767,6 +4767,115 @@ def Fin_change_vendor_status(request,id,sta):
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+@api_view(("GET",))
+def Fin_vendorTransactionsPdf(request, ID, id):
+    try:
+        data = Fin_Login_Details.objects.get(id=ID)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=ID)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=ID).company_id
+
+        vnd = Fin_Vendor.objects.get(id = id)
+
+        Bal = 0
+        combined_data=[]
+        dict = {
+            'Type' : 'Opening Balance', 'Number' : "", 'Total': vnd.Opening_balance, 'Balance': vnd.Opening_balance
+        }
+        combined_data.append(dict)
+# , 'Date' : vnd.date
+        if vnd.Opening_balance_type == 'credit':
+            Bal += float(vnd.Opening_balance)
+        else:
+            Bal -= float(vnd.Opening_balance)
+        context = {'vendor':vnd, 'cmp':com, 'BALANCE':Bal, 'combined_data':combined_data}
+        template_path = 'company/Fin_Vendor_Transaction_Pdf.html'
+        fname = 'Vendor_Transactions_'+vnd.First_name+'_'+vnd.Last_name
+        # return render(request, 'company/Fin_Vendor_Transaction_Pdf.html',context)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] =f'attachment; filename = {fname}.pdf'
+        template = get_template(template_path)
+        html = template.render(context)
+        pisa_status = pisa.CreatePDF(
+        html, dest=response)
+        if pisa_status.err:
+            return HttpResponse("We had some errors <pre>" + html + "</pre>")
+        return response
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+@api_view(("POST",))
+def Fin_sharevendorTransactionsToEmail(request):
+    try:
+        id = request.data["Id"]
+        data = Fin_Login_Details.objects.get(id=id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=id).company_id
+
+        vedorid = request.data["id"]
+        vendor = Fin_Vendor.objects.get(id=vedorid)
+        emails_string = request.data["email_ids"]
+
+        # Split the string by commas and remove any leading or trailing whitespace
+        emails_list = [email.strip() for email in emails_string.split(",")]
+        email_message = request.data["email_message"]
+        # print(emails_list)'Date' : vnd.date,
+
+        Bal = 0
+        combined_data=[]
+        dict = {
+            'Type' : 'Opening Balance', 'Number' : "",  'Total': vendor.Opening_balance, 'Balance': vendor.Opening_balance
+        }
+        combined_data.append(dict)
+        if vendor.Opening_balance_type == 'credit':
+            Bal += float(vendor.Opening_balance)
+        else:
+            Bal -= float(vendor.Opening_balance)
+    
+        context = {'vendor':vendor, 'cmp':com, 'BALANCE':Bal, 'combined_data':combined_data}
+        template_path = "company/Fin_Vendor_Transaction_Pdf.html"
+        template = get_template(template_path)
+
+        html = template.render(context)
+        result = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+        pdf = result.getvalue()
+        filename = f'Vendor_Transactions_{vendor.First_name}_{vendor.Last_name}'
+        subject = f"Vendor_Transactions_{vendor.First_name}_{vendor.Last_name}"
+        email = EmailMessage(
+            subject,
+            f"Hi,\nPlease find the attached Transaction details for - Vendor-{vendor.First_name} {vendor.Last_name}. \n{email_message}\n\n--\nRegards,\n{com.Company_name}\n{com.Address}\n{com.State} - {com.Country}\n{com.Contact}",
+            from_email=settings.EMAIL_HOST_USER,
+            to=emails_list,
+        )
+        email.attach(filename, pdf, "application/pdf")
+        email.send(fail_silently=False)
+
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
+@api_view(("GET",))
+def Fin_get_vendor_details(request,id,ID):
+    try:
+        print(id)
+        print(ID)
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
     
 
     

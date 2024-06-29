@@ -6,21 +6,33 @@ import Cookies from 'js-cookie';
 import axios from "axios";
 import config from "../../../functions/config";
 import Vendors from "./Allvendors";
+import Swal from "sweetalert2";
 
-//  ${itemId}/
+
 function View_vendor () {
     const ID = Cookies.get("Login_id");
     const location = useLocation();
-    const { vendor } = location.state || {};
-    // const { id } = useParams();
-    // const [item, setItem] = useState(null);
-
-    // useEffect(() => {
-    //     fetch(`${config.base_url}/view_vendor/${id}/`)
-    //         .then(response => response.json())
-    //         .then(data => setItem(data));
-    // }, [id]);
-    // console.log('user id',id)
+    const { id } = useParams();
+    const [vendor,setVendor] = useState([]);
+    const [company,setCompany] = useState([]);
+    const navigate = useNavigate();
+    const viewvendor = () =>{
+        axios.get(`${config.base_url}/view_vendor/${id}/${ID}/`).then((res)=>{
+            if(res.data.status){
+              var vendor = res.data.vendors;
+              var company = res.data.company;
+            
+            }
+            setVendor(vendor);
+            setCompany(company);
+          }).catch((err)=>{
+            console.log('ERR',err)
+          })
+        }
+        useEffect(()=>{
+            viewvendor();
+          },[])
+   
     $(document).ready(function ($) {
         $(".table-row").click(function () {
             window.document.location = $(this).data("href");
@@ -84,12 +96,162 @@ function View_vendor () {
         try{
             const response = await axios.post(`${config.base_url}/change_vendor_status/${id}/${status}/`)
             console.log('Changed');
+            viewvendor();
         } catch (error) {
             console.log('Error');
         }
     }
-
+    function exportToExcel() {
+        const Table = document.getElementById("dataTable");
+        const ws = XLSX.utils.table_to_sheet(Table);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, "Vendor Transactions.xlsx");
+      }
+      function vendorTransactionPdf() {
+        axios
+          .get(`${config.base_url}/vendor_transaction_pdf/${id}/${ID}/`, {
+            responseType: "blob",
+          })
+          .then((res) => {
+            console.log("PDF RES=", res);
+            console.log(res.data);
+            const file = new Blob([res.data], { type: "application/pdf" });
+            const fileURL = URL.createObjectURL(file);
+            const a = document.createElement("a");
+            a.href = fileURL;
+            a.download = `vendor_transactions_${id}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          })
+          .catch((err) => {
+            console.log("ERROR=", err);
+            if (err.response && err.response.data && !err.response.data.status) {
+              Swal.fire({
+                icon: "error",
+                title: `${err.response.data.message}`,
+              });
+            }
+          });
+      }
+      function printSheet() {
+        var divToPrint = document.getElementById("printContent");
+        var printWindow = window.open("", "", "height=700,width=1000");
     
+        printWindow.document.write("<html><head><title></title>");
+        printWindow.document.write(`
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Black+Ops+One&family=Gluten:wght@100..900&family=Playball&display=swap" rel="stylesheet">
+        `);
+        printWindow.document.write("</head>");
+        printWindow.document.write("<body>");
+        printWindow.document.write(divToPrint.outerHTML);
+        printWindow.document.write("</body>");
+        printWindow.document.write("</html>");
+        printWindow.document.close();
+        printWindow.print();
+        printWindow.addEventListener('afterprint', function() {
+          printWindow.close();
+        });
+    
+      }
+      const currentUrl = window.location.href;
+      const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+        currentUrl
+      )}`;
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        },
+      });
+
+      const [emailIds, setEmailIds] = useState("");
+        const [emailMessage, setEmailMessage] = useState("");
+      function handleShareEmail(e) {
+        e.preventDefault();
+    
+        var emailsString = emailIds.trim();
+    
+        var emails = emailsString.split(",").map(function (email) {
+          return email.trim();
+        });
+    
+        var emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    
+        var invalidEmails = [];
+        if (emailsString === "") {
+          alert("Enter valid email addresses.");
+        } else {
+          for (var i = 0; i < emails.length; i++) {
+            var currentEmail = emails[i];
+    
+            if (currentEmail !== "" && !emailRegex.test(currentEmail)) {
+              invalidEmails.push(currentEmail);
+            }
+          }
+    
+          if (invalidEmails.length > 0) {
+            alert("Invalid emails. Please check!\n" + invalidEmails.join(", "));
+          } else {
+            // document.getElementById("share_to_email_form").submit();
+            var em = {
+              id: id,
+              Id: ID,
+              email_ids: emailIds,
+              email_message: emailMessage,
+            };
+            axios
+              .post(`${config.base_url}/share_vendor_transaction_mail/`, em)
+              .then((res) => {
+                if (res.data.status) {
+                  Toast.fire({
+                    icon: "success",
+                    title: "Shared via mail.",
+                  });
+                  setEmailIds("");
+                  setEmailMessage("");
+                }
+              })
+              .catch((err) => {
+                console.log("ERROR=", err);
+                if (
+                  err.response &&
+                  err.response.data &&
+                  !err.response.data.status
+                ) {
+                  Swal.fire({
+                    icon: "error",
+                    title: `${err.response.data.message}`,
+                  });
+                }
+              });
+          }
+        }
+      }
+      function searchTable(){
+        var rows = document.querySelectorAll('#dataTable tbody tr');
+        var val = document.getElementById('search').value.trim().replace(/ +/g, ' ').toLowerCase();
+        rows.forEach(function(row) {
+          var text = row.textContent.replace(/\s+/g, ' ').toLowerCase();
+          row.style.display = text.includes(val) ? '' : 'none';
+        });
+      }
+      const EditVendor = async  (id) => {
+        try{
+            navigate(`/edit_vendor/${id}/`)
+        } catch (error) {
+            console.log('Failed')
+        }
+      }
 
 
     return (
@@ -116,17 +278,65 @@ function View_vendor () {
                         ): (
                             <a className="ml-2 fa fa-ban btn btn-outline-secondary text-grey" role="button" style={{height:'30px',width:'100px'}} id="activeBtn" onClick={() => Change_vendor_status(vendor.id,'Active')}>&nbsp;Inactive</a>   
                         )}
-                        <a className="ml-2 btn btn-outline-secondary text-grey fa fa-table" role="button" id="exportBtn" style={{display:'none',height:'30px',width:'100px'}} onclick="ExportToExcel('xlsx')">&nbsp;Export</a>
-                            <a href="{% url 'Fin_vendorTransactionsPdf' vendor.id %}" className="ml-2 btn btn-outline-secondary text-grey fa fa-file" role="button" id="pdfBtn" style={{display:'none',height:'30px',width:'100px'}}> &nbsp;PDF</a> 
-                            <a className="ml-2 btn btn-outline-secondary text-grey fa fa-print" role="button" id="printBtn" style={{display:'none',height:'30px',width:'100px'}} onclick="templatePrint()">&nbsp;Print</a>
-                            <div className="dropdown p-0 nav-item"  id="shareBtn" style={{display:'none'}}>
+                        <a className="ml-2 btn btn-outline-secondary text-grey fa fa-table" role="button" id="exportBtn" style={{display:'none',height:'30px',width:'100px'}} onClick={() =>exportToExcel()}>&nbsp;Export</a>
+                            <a className="ml-2 btn btn-outline-secondary text-grey fa fa-file" role="button" id="pdfBtn" style={{display:'none',height:'30px',width:'100px'}} onClick={vendorTransactionPdf}> &nbsp;PDF</a> 
+                            <a className="ml-2 btn btn-outline-secondary text-grey fa fa-print" role="button" id="printBtn" style={{display:'none',height:'30px',width:'100px'}} onClick={() => printSheet()}>&nbsp;Print</a>
+                            {/* <div className="dropdown p-0 nav-item"  id="shareBtn" style={{display:'none'}}>
                                 <li  className="ml-2 dropdown-toggle btn btn-outline-secondary text-grey fa fa-share-alt" data-toggle="dropdown" style={{height:'30px',width:'100px'}}>&nbsp;Share</li>
                                 <ul className="dropdown-menu" style={{backgroundColor:'black'}} id="listdiv">
-                                    {/* <li style={{textAlign:'center'}} >{% post_to_whatsapp object_or_url "WhatsApp" %}</li> */}
+                                    
                                     <li style={{textAlign:'center',color:'#e5e9ec',cursor:'pointer'}} data-toggle="modal" data-target="#shareToEmail">Email</li>
                                 </ul>
-                            </div>
-                        <a href="{% url 'Fin_editVendor' vendor.id %}" class="ml-2 fa fa-pencil btn btn-outline-secondary text-grey" id="editBtn" role="button" style={{height:'30px',width:'100px'}}>&nbsp;Edit</a>
+                            </div> */}
+                            <div
+                      className="dropdown p-0 nav-item"
+                      id="shareBtn"
+                      style={{ display: "none" }}
+                    >
+                      <li
+                        className="ml-2 dropdown-toggle btn btn-outline-secondary text-grey fa fa-share-alt"
+                        data-toggle="dropdown"
+                        style={{
+                          height: "fit-content",
+                          width: "fit-content",
+                        }}
+                      >
+                        &nbsp;Share
+                      </li>
+                      <ul
+                        className="dropdown-menu"
+                        style={{ backgroundColor: "black" }}
+                        id="listdiv"
+                      >
+                        <a
+                          href={shareUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <li
+                            style={{
+                              textAlign: "center",
+                              color: "#e5e9ec",
+                              cursor: "pointer",
+                            }}
+                          >
+                            WhatsApp
+                          </li>
+                        </a>
+                        <li
+                          style={{
+                            textAlign: "center",
+                            color: "#e5e9ec",
+                            cursor: "pointer",
+                          }}
+                          data-toggle="modal"
+                          data-target="#shareToEmail"
+                        >
+                          Email
+                        </li>
+                      </ul>
+                    </div>
+                        <a class="ml-2 fa fa-pencil btn btn-outline-secondary text-grey" id="editBtn" role="button" style={{height:'30px',width:'100px'}} onClick={() =>EditVendor(vendor.id)}>&nbsp;Edit</a>
                         <a href="{% url 'Fin_deleteVendor' vendor.id %}" class="ml-2 btn btn-outline-secondary text-grey fa fa-trash" id="deleteBtn" role="button" onclick="return confirm('Are you sure you want to delete Vendor - {{vendor.first_name}}.?')" style={{height:'30px',width:'100px'}}>&nbsp;Delete</a>
                         <a href="#"  class="ml-2 btn btn-outline-secondary text-grey fa fa-comments" id="commentsBtn" role="button" data-toggle="modal" data-target="#commentModal" style={{height:'30px',width:'100px'}}>&nbsp;Comment</a>
                         <a href="{% url 'Fin_vendorHistory' vendor.id %}"  class="ml-2 btn btn-outline-secondary text-grey fa fa-history" id="historyBtn" role="button" style={{height:'30px',width:'100px'}}>&nbsp;History</a>
@@ -138,7 +348,7 @@ function View_vendor () {
                             {/* <a href="{% url 'Fin_changeVendorStatus' vendor.id 'Inactive' %}" id="inactiveBtn" class="ml-2 fa fa-check-circle btn btn-outline-secondary text-grey" role="button" >&nbsp;Active</a> */}
                             {/* <a className="ml-2 fa fa-check-circle btn btn-outline-secondary text-grey" role="button">&nbsp;Active</a>   */}
                             {/* {% endif %} */}
-                        
+                        {/* <li style={{textAlign:'center'}} >{% post_to_whatsapp object_or_url "WhatsApp" %}</li> */}
                             
                         </div>
                     </div> 
@@ -168,7 +378,7 @@ function View_vendor () {
                                     <div className="row">
                                         <div className="col mt-3">
                                             {/* <h2 class="mb-0">{{ vendor.title }}. {{ vendor.first_name }} {{ vendor.last_name }}</h2> */}
-                                            <h2 class="mb-0">{vendor.Title}. {vendor.First_name}  {vendor.Last_name}</h2>
+                                            <h2 class="mb-0"> {vendor.Title} .{vendor.First_name}  {vendor.Last_name}</h2>
                                         </div>
                                     </div>
                                 </div>
@@ -480,7 +690,7 @@ function View_vendor () {
                         <hr />
                         <div className="row mt-4 d-flex justify-content-between">
                             <h5 style={{marginLeft:'15px'}}><strong>Transactions</strong></h5>
-                            <input type="text" id="search" className="form-control w-25" placeholder="Search.." autocomplete="off" style={{position:'relative',left:'1200px',bottom:'30px'}}/>
+                            <input type="text" id="search" className="form-control w-25" placeholder="Search.." autocomplete="off" style={{position:'relative',left:'1200px',bottom:'30px'}} onKeyUp={searchTable}/>
                         </div>
                     </div>
                     <div className="col-md-1"></div>
@@ -653,21 +863,21 @@ function View_vendor () {
                                                                                 {/* <div style={{width:'20px'}}>
                                                                                     {% if cmp.Image %}<img src="{{cmp.Image.url}}" style="width: 25px;">{% endif %}
                                                                                 </div> */}
-                                                                                {/* <p style={{color:'black'}}><strong>{{ cmp.Company_name }}</strong> <br />
-                                                                                    {{cmp.City}} <br />
-                                                                                    {{cmp.State}},{{cmp.Country}} <br />
-                                                                                    {{cmp.Email}}<br />
-                                                                                    {{cmp.Pincode}}<br />
-                                                                                </p>   */}
+                                                                                <p style={{color:'black'}}><strong>{ company.Company_name }</strong> <br />
+                                                                                    {company.City} <br />
+                                                                                    {company.State},{company.Country} <br />
+                                                                                    {company.Email}<br />
+                                                                                    {company.Pincode}<br />
+                                                                                </p>  
                                                                             </div>
                                                                             <div style={{width:'50%',paddingTop:'1rem'}}>
-                                                                                {/* <p style="color:black;">To,<br /><strong>{{vendor.first_name}} {{vendor.last_name}}</strong><br />
-                                                                                    {{vendor.billing_street}},{{vendor.billing_city}}<br />
-                                                                                    {{vendor.billing_state}},{{vendor.billing_country}}<br />
-                                                                                    {{vendor.billing_pincode }}<br />
-                                                                                    {{vendor.email}}<br />
-                                                                                    {{vendor.mobile}}<br />
-                                                                                </p> */}
+                                                                                <p style={{color:'black'}}>To,<br /><strong>{vendor.First_name} {vendor.Last_name}</strong><br />
+                                                                                    {vendor.Billing_street},{vendor.Billing_city}<br />
+                                                                                    {vendor.Billing_state},{vendor.Billing_country}<br />
+                                                                                    {vendor.Billing_pincode }<br />
+                                                                                    {vendor.Vendor_email}<br />
+                                                                                    {vendor.Mobile}<br />
+                                                                                </p>
                                                                             </div>
                                                                         
                                                                         </div>
@@ -682,12 +892,12 @@ function View_vendor () {
                                                                                 <tr>
                                                                                     <th>Opening balance</th>
                                                                                     <th>:</th>
-                                                                                    {/* <th>{{vendor.opening_balance}}</th> */}
+                                                                                    <th>{vendor.Opening_balance}</th>
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <th>Balance</th>
                                                                                     <th>:</th>
-                                                                                    {/* <th>{{BALANCE}}</th> */}
+                                                                                    <th>{vendor.Opening_balance}</th>
                                                                                 </tr>
                                                                             </table>
                                                                         </div>
@@ -723,6 +933,13 @@ function View_vendor () {
                                                                                 <th style="padding:1.2rem 0.5rem;" colspan="4">BALANCE</th>
                                                                                 <th >{{BALANCE}}</th>
                                                                             </tr>  */}
+                                                                            <tr style={{padding:'1.2rem 0.5rem'}}>
+                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
+                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black',fontFamily:'monospace'}}><strong>Opening Balance</strong></td>
+                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
+                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
+                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}>{vendor.Opening_balance}</td>
+                                                                            </tr>
                                                                         </tbody>
                                                                     </table>
                                                                 </div>
@@ -744,6 +961,71 @@ function View_vendor () {
         </div>
     </div>
 </div>
+<div className="modal fade" id="shareToEmail">
+        <div className="modal-dialog modal-lg">
+          <div className="modal-content" style={{ backgroundColor: "#213b52" }}>
+            <div className="modal-header">
+              <h5 className="m-3">Share Vendor Transactions</h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <form
+                onSubmit={handleShareEmail}
+                className="needs-validation px-1"
+                id="share_to_email_form"
+              >
+                <div className="card p-3 w-100">
+                  <div className="form-group">
+                    <label for="emailIds">Email IDs</label>
+                    <textarea
+                      className="form-control"
+                      name="email_ids"
+                      id="emailIds"
+                      rows="3"
+                      placeholder="Multiple emails can be added by separating with a comma(,)."
+                      value={emailIds}
+                      onChange={(e) => setEmailIds(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group mt-2">
+                    <label for="item_unitname">Message(optional)</label>
+                    <textarea
+                      name="email_message"
+                      id="email_message"
+                      className="form-control"
+                      cols=""
+                      rows="4"
+                      value={emailMessage}
+                      onChange={(e) => setEmailMessage(e.target.value)}
+                      placeholder="This message will be sent along with Bill details."
+                    />
+                  </div>
+                </div>
+                <div
+                  className="modal-footer d-flex justify-content-center w-100"
+                  style={{ borderTop: "1px solid #ffffff" }}
+                >
+                  <button
+                    type="submit"
+                    id="share_with_email"
+                    className="submitShareEmailBtn w-50 text-uppercase"
+                  >
+                    SEND MAIL
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
                     
                                     
                        

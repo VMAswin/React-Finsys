@@ -98,5 +98,8 @@ urlpatterns = [
     path('all_vendors/<int:id>/',Fin_all_vendors),
     path('view_vendor/<int:id>/',Fin_view_vendor),
     path('change_vendor_status/<int:id>/<str:sta>/',Fin_change_vendor_status),
+    path('vendor_transaction_pdf/<int:id>/<int:ID>/',Fin_vendorTransactionsPdf),
+    path('share_vendor_transaction_mail/',Fin_sharevendorTransactionsToEmail),
+    path('get_vendor_details/<int:id>/<int:ID>/',Fin_get_vendor_details),
 
 ]

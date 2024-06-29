@@ -53,7 +53,7 @@ import AddCustomer from './components/company/customers/AddCustomer';
 import Vendors from './components/company/vendors/Allvendors';
 import Addvendor from './components/company/vendors/Addvendor';
 import View_vendor from './components/company/vendors/view_vendor';
-
+import Edit_vendor from './components/company/vendors/Edit_vendor';
 function App() {
   return (
   <>
@@ -126,7 +126,8 @@ function App() {
             {/* Vendors */}
             <Route path="/vendors" element={<Vendors />} />
             <Route path="/add_vendor" element={<Addvendor/>} />
-            <Route path="/view_vendor" element={<View_vendor />} />
+            <Route path="/view_vendor/:id/" element={<View_vendor />} />
+            <Route path="/edit_vendor/:id/" element={<Edit_vendor />} />
           </Route>
         </Routes>
       </BrowserRouter>
