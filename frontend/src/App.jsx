@@ -54,6 +54,7 @@ import Vendors from './components/company/vendors/Allvendors';
 import Addvendor from './components/company/vendors/Addvendor';
 import View_vendor from './components/company/vendors/view_vendor';
 import Edit_vendor from './components/company/vendors/Edit_vendor';
+import Vendorhistory from './components/company/vendors/vendorhistory';
 function App() {
   return (
   <>
@@ -128,6 +129,7 @@ function App() {
             <Route path="/add_vendor" element={<Addvendor/>} />
             <Route path="/view_vendor/:id/" element={<View_vendor />} />
             <Route path="/edit_vendor/:id/" element={<Edit_vendor />} />
+            <Route path="/vendor_history" element={<Vendorhistory />} />
           </Route>
         </Routes>
       </BrowserRouter>

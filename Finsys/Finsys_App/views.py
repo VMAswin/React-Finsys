@@ -4868,14 +4868,89 @@ def Fin_sharevendorTransactionsToEmail(request):
 @api_view(("GET",))
 def Fin_get_vendor_details(request,id,ID):
     try:
-        print(id)
-        print(ID)
+        log = Fin_Login_Details.objects.get(id=ID)
+        login = LoginDetailsSerializer(log)
+        vend = Fin_Vendor.objects.get(id=id)
+        vendor = VendorSerializer(vend)
+        if log.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id = ID)
+            company = CompanyDetailsSerializer(com)
+            trms = Fin_Company_Payment_Terms.objects.filter(Company = com)
+            ctrms = CompanyPaymentTermsSerializer(trms)
+            return Response({"status": True,'com':company.data,'data':login.data,'vendor':vendor.data,'pTerms':ctrms.data}, status=status.HTTP_200_OK)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id = ID)
+            company = CompanyDetailsSerializer(com)
+            trms = Fin_Company_Payment_Terms.objects.filter(Company = com.company_id)
+            ctrms = CompanyPaymentTermsSerializer(trms)
+            return Response({"status": True,'com':company.data,'data':login.data,'vendor':vendor.data,'pTerms':ctrms.data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+@api_view(("PUT",))
+def Fin_update_vendor(request):
+    try:
+        v_id = request.data["Id"]
+        data = Fin_Login_Details.objects.get(id=v_id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=v_id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=v_id).company_id
+        vendid = request.data["id"]
+        vendor = Fin_Vendor.objects.get(id=vendid)
+        vendor.Title = request.data["Title"]
+        vendor.First_name = request.data["Firstname"]
+        vendor.Last_name = request.data["Lastname"]
+        vendor.Company_Name = request.data["Company"]
+        vendor.Location = request.data["Location"]
+        vendor.Vendor_email = request.data["Email"]
+        vendor.Website = request.data["Website"]
+        vendor.Mobile = request.data["Mobile"]
+        vendor.GST_Treatment = request.data["Gsttype"]
+        vendor.GST_Number = request.data["Gstno"]
+        vendor.Pan_Number = request.data["Panno"]
+        vendor.Place_of_supply = request.data["Placeofsupply"]
+        vendor.Opening_balance = request.data["Openingbalance"]
+        vendor.Opening_balance_type = request.data["Openingbalatype"]
+        vendor.Credit_limit = request.data["Creditlimit"]
+        vendor.Billing_street = request.data["Billingstreet"]
+        vendor.Billing_city = request.data["Billingcity"]
+        vendor.Billing_country = request.data["Billingcountry"]
+        vendor.Billing_pincode = request.data["Billingpin"]
+        vendor.Billing_state = request.data["Billingstate"]
+        vendor.Shipping_city = request.data["Shipcity"]
+        vendor.Shipping_country = request.data["Shipcountry"]
+        vendor.Shipping_pincode = request.data["Shippin"]
+        vendor.Shipping_state = request.data["Shipstate"]
+        vendor.Shipping_street = request.data["Shipstreet"]
+        payment_terms = request.data["Payment"]
+        term = Fin_Company_Payment_Terms.objects.get(id=payment_terms)
+        vendor.payment_terms = term
+        vendor.save()
+        history = Fin_Vendor_History.objects.create(Company=com,Login_details=data,Vendor=vendor,Action='Edited')
+        history.save()
         return Response({"status": True}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response(
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+@api_view(("DELETE",))
+def Fin_delete_vendor(request,id):
+    try:
+        vendor = Fin_Vendor.objects.get(id=id)
+        vendor.delete()
+        return Response({"status": True}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )    
+
     
 
     

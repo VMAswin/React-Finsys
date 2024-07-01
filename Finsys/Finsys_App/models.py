@@ -404,11 +404,14 @@ class Fin_Vendor(models.Model):
     Shipping_state = models.CharField(max_length=200,null=True)
     Shipping_country = models.CharField(max_length=200,null=True)
     Shipping_pincode = models.CharField(max_length=10,null=True)
+    currency = models.CharField(max_length=50,null=True)
+    Date = models.DateField(auto_now_add=True,auto_now=False,null=True)
     vendor_status = (
         ('Active','Active'),
         ('Inactive','Inactive'),
     )
     status = models.CharField(max_length=100,null=True,choices=vendor_status,default='Active')
+    payment_terms = models.ForeignKey(Fin_Company_Payment_Terms,on_delete=models.CASCADE,null=True)
     Company = models.ForeignKey(Fin_Company_Details,on_delete=models.CASCADE,null=True)
     Login_details = models.ForeignKey(Fin_Login_Details,on_delete=models.CASCADE,null=True)
 

@@ -15,16 +15,24 @@ function View_vendor () {
     const { id } = useParams();
     const [vendor,setVendor] = useState([]);
     const [company,setCompany] = useState([]);
+    const [terms,setTerms] = useState([]);
+    const [history,setHistory] =  useState([]);
+    const [comments, setComments] = useState([]);
     const navigate = useNavigate();
     const viewvendor = () =>{
         axios.get(`${config.base_url}/view_vendor/${id}/${ID}/`).then((res)=>{
             if(res.data.status){
               var vendor = res.data.vendors;
               var company = res.data.company;
-            
+              var term = res.data.payment_term;
+              var hist = res.data.history;
             }
             setVendor(vendor);
             setCompany(company);
+            setTerms(term);
+            if (hist) {
+                setHistory(hist);
+            }
           }).catch((err)=>{
             console.log('ERR',err)
           })
@@ -252,7 +260,100 @@ function View_vendor () {
             console.log('Failed')
         }
       }
-
+      function DeleteVendor(id) {
+        Swal.fire({
+            title: `Delete Vendor - ${vendor.First_name}?`,
+            text: "All datas will be deleted.!",
+            icon: "warning",
+            showCancelButton: true,
+            cancelButtonColor: "#3085d6",
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Delete",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              axios
+                .delete(`${config.base_url}/delete_vendor/${id}/`)
+                .then((res) => {
+                  console.log(res);
+      
+                  Toast.fire({
+                    icon: "success",
+                    title: "Item Deleted successfully",
+                  });
+                  navigate("/vendors");
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            }
+          });
+      }
+      const [comment, setComment] = useState("");
+      const saveItemComment = (e) => {
+        e.preventDefault();
+        var cmt = {
+          Id: ID,
+          comments: comment,
+        };
+        axios
+          .post(`${config.base_url}/add_item_comment/`, cmt)
+          .then((res) => {
+            console.log(res);
+            if (res.data.status) {
+              Toast.fire({
+                icon: "success",
+                title: "Comment Added",
+              });
+              setComment("");
+              viewvendor();
+            }
+          })
+          .catch((err) => {
+            console.log("ERROR=", err);
+            if (!err.response.data.status) {
+              Swal.fire({
+                icon: "error",
+                title: `${err.response.data.message}`,
+              });
+            }
+          });
+      };
+      function deleteComment(id) {
+        Swal.fire({
+          title: "Delete Comment?",
+          text: "Are you sure you want to delete this.!",
+          icon: "warning",
+          showCancelButton: true,
+          cancelButtonColor: "#3085d6",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "Delete",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            axios
+              .delete(`${config.base_url}/delete_item_comment/${id}/`)
+              .then((res) => {
+                console.log(res);
+    
+                Toast.fire({
+                  icon: "success",
+                  title: "Comment Deleted",
+                });
+                viewvendor();
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        });
+      }
+      const handleclick = async () =>{
+        try{
+          navigate(`/vendor_history`);
+        } catch (error) {
+          console.log('none....')
+        }
+       
+      } 
 
     return (
         <>
@@ -337,13 +438,13 @@ function View_vendor () {
                       </ul>
                     </div>
                         <a class="ml-2 fa fa-pencil btn btn-outline-secondary text-grey" id="editBtn" role="button" style={{height:'30px',width:'100px'}} onClick={() =>EditVendor(vendor.id)}>&nbsp;Edit</a>
-                        <a href="{% url 'Fin_deleteVendor' vendor.id %}" class="ml-2 btn btn-outline-secondary text-grey fa fa-trash" id="deleteBtn" role="button" onclick="return confirm('Are you sure you want to delete Vendor - {{vendor.first_name}}.?')" style={{height:'30px',width:'100px'}}>&nbsp;Delete</a>
+                        <a class="ml-2 btn btn-outline-secondary text-grey fa fa-trash" id="deleteBtn" role="button"  style={{height:'30px',width:'100px'}} onClick={() =>DeleteVendor(vendor.id)}>&nbsp;Delete</a>
                         <a href="#"  class="ml-2 btn btn-outline-secondary text-grey fa fa-comments" id="commentsBtn" role="button" data-toggle="modal" data-target="#commentModal" style={{height:'30px',width:'100px'}}>&nbsp;Comment</a>
-                        <a href="{% url 'Fin_vendorHistory' vendor.id %}"  class="ml-2 btn btn-outline-secondary text-grey fa fa-history" id="historyBtn" role="button" style={{height:'30px',width:'100px'}}>&nbsp;History</a>
+                        <a class="ml-2 btn btn-outline-secondary text-grey fa fa-history" id="historyBtn" role="button" style={{height:'30px',width:'100px'}} onClick={() => handleclick()}>&nbsp;History</a>
 
                             {/* {% if vendor.status == 'Inactive' %} */}
                             {/* <a href="{% url 'Fin_changeVendorStatus' vendor.id 'Active' %}" id="activeBtn" class="ml-2 fa fa-ban btn btn-outline-secondary text-grey" role="button" >&nbsp;Inactive</a> */}
-                            {/* <a className="ml-2 fa fa-ban btn btn-outline-secondary text-grey" role="button">&nbsp;Inactive</a>  */}
+                            {/* <a className="ml-2 fa fa-ban btn btn-outline-secondary text-grey" role="button">&nbsp;Inactive</a> onclick="return confirm('Are you sure you want to delete Vendor - {{vendor.first_name}}.?')" */}
                             {/* {% else %} */}
                             {/* <a href="{% url 'Fin_changeVendorStatus' vendor.id 'Inactive' %}" id="inactiveBtn" class="ml-2 fa fa-check-circle btn btn-outline-secondary text-grey" role="button" >&nbsp;Active</a> */}
                             {/* <a className="ml-2 fa fa-check-circle btn btn-outline-secondary text-grey" role="button">&nbsp;Active</a>   */}
@@ -367,9 +468,9 @@ function View_vendor () {
                     <div className="col-lg-8">
                         <div className="history_highlight pt-3 px-2 d-flex">
                             <div className="col-12 d-flex justify-content-start align-items-center">
-                                {/* {% if history %}{% if history.action == 'Created' %}<p class="text-success m-0" style="font-size: 1.07rem; font-weight: 500;">Created by :</p>{% else %}<p class="text-warning m-0" style="font-size: 1.07rem; font-weight: 500;">Last Edited by :</p>{% endif %}{% endif %}
-                                <span class="ml-2" style="font-size: 1.15rem; font-weight: 500;">{{history.LoginDetails.First_name}} {{history.LoginDetails.Last_name}}</span>
-                                <span class="ml-5">{{history.date}}</span> */}
+                                {history.action == 'Created' ? (<p className="text-success m-0" style={{fontSize:'1.07rem',fontWeight:'500'}}>Created by :</p>):(<p class="text-warning m-0" style={{fontSize:'1.07rem',fontWeight:'500'}}>Last Edited by :</p>)}
+                                <span className="ml-2" style={{fontSize:'1.07rem',fontWeight:'500'}}>{history.doneBy}</span>
+                                <span className="ml-5">{history.date}</span>
                             </div>
                         </div>
                         <div className="pb-3 px-2">
@@ -452,7 +553,7 @@ function View_vendor () {
                                         :
                                     </div>
                                     <div class="col-md-3 mt-3">
-                                        <p class="mb-0"></p>
+                                        <p class="mb-0">{terms}</p>
                                     </div>
                                     <div class="col-md-2 mt-3 vl">
                                         <h6 class="mb-0">Price List</h6>
@@ -806,7 +907,7 @@ function View_vendor () {
                                     <td>1</td>
                                     <td><strong>Opening Balance</strong></td>
                                     <td></td>
-                                    <td></td>
+                                    <td>{vendor.Date}</td>
                                     <td>{vendor.Opening_balance}</td>
                                     <td>{vendor.Opening_balance}</td>
                                 </tr>
@@ -937,7 +1038,7 @@ function View_vendor () {
                                                                             <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
                                                                             <td style={{padding:'1.2rem 0.5rem',color:'black',fontFamily:'monospace'}}><strong>Opening Balance</strong></td>
                                                                             <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
-                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
+                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}>{vendor.Date}</td>
                                                                             <td style={{padding:'1.2rem 0.5rem',color:'black'}}>{vendor.Opening_balance}</td>
                                                                             </tr>
                                                                         </tbody>
@@ -1026,7 +1127,103 @@ function View_vendor () {
           </div>
         </div>
       </div>
-                    
+      <div
+        className="modal fade"
+        id="commentModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content" style={{ backgroundColor: "#213b52" }}>
+            <div className="modal-header">
+              <h3 className="modal-title" id="exampleModalLabel">
+                Add Comments
+              </h3>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <form onSubmit={saveItemComment} className="px-1">
+              <div className="modal-body w-100">
+                <textarea
+                  type="text"
+                  className="form-control"
+                  name="comment"
+                  value={comment}
+                  required
+                  onChange={(e) => setComment(e.target.value)}
+                />
+                {comments.length > 0 ? (
+                  <div className="container-fluid">
+                    <table className="table mt-4">
+                      <thead>
+                        <tr>
+                          <th className="text-center">sl no.</th>
+                          <th className="text-center">Comment</th>
+                          <th className="text-center">Delete</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comments.map((c, index) => (
+                          <tr className="table-row">
+                            <td className="text-center">{index + 1}</td>
+                            <td className="text-center">{c.comments}</td>
+                            <td className="text-center">
+                              <a
+                                className="text-danger"
+                                onClick={() => deleteComment(`${c.id}`)}
+                              >
+                                <i
+                                  className="fa fa-trash"
+                                  style={{
+                                    fontSize: "1.1rem",
+                                    cursor: "pointer",
+                                  }}
+                                ></i>
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <span className="my-2 font-weight-bold d-flex justify-content-center">
+                    No Comments.!
+                  </span>
+                )}
+              </div>
+
+              <div className="modal-footer w-100">
+                <button
+                  type="button"
+                  style={{ width: "fit-content", height: "fit-content" }}
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  style={{ width: "fit-content", height: "fit-content" }}
+                  className="btn"
+                  id="commentSaveBtn"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>        
                                     
                        
                         

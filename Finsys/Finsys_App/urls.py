@@ -101,5 +101,7 @@ urlpatterns = [
     path('vendor_transaction_pdf/<int:id>/<int:ID>/',Fin_vendorTransactionsPdf),
     path('share_vendor_transaction_mail/',Fin_sharevendorTransactionsToEmail),
     path('get_vendor_details/<int:id>/<int:ID>/',Fin_get_vendor_details),
+    path('update_vendor/',Fin_update_vendor),
+    path('delete_vendor/<int:id>/',Fin_delete_vendor),
 
 ]
