@@ -4950,6 +4950,54 @@ def Fin_delete_vendor(request,id):
             {"status": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )    
+@api_view(("POST",))
+def Fin_add_vendor_comment(request):
+    try:
+        c_id = request.data["Id"]
+        data = Fin_Login_Details.objects.get(id=c_id)
+        if data.User_Type == "Company":
+            com = Fin_Company_Details.objects.get(Login_Id=c_id)
+        else:
+            com = Fin_Staff_Details.objects.get(Login_Id=c_id).company_id
+        vendor_id = request.data["id"]
+        vendor = Fin_Vendor.objects.get(id=vendor_id)
+        comments = request.data["comments"]
+        comm = Fin_Vendor_Comments.objects.create(Company=com,Vendor=vendor,comments=comments)
+        serializer = VendorCommentSerializer(comm)
+        comm.save()
+        return Response({"status": True,"comments":serializer.data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    
+    
+@api_view(("GET",))
+def Fin_fetch_vendor_history(request, id):
+    try:
+        vendor = Fin_Vendor.objects.get(id=id)
+        hist = Fin_Vendor_History.objects.filter(Vendor=vendor)
+        his = []
+        if hist:
+            for i in hist:
+                h = {
+                    "action": i.Action,
+                    "date": i.Date,
+                    "name": i.Login_details.First_name + " " + i.Login_details.Last_name,
+                }
+                his.append(h)
+        vendorserializer = VendorSerializer(vendor)
+        return Response(
+            {"status": True, "vendor": vendorserializer.data, "history": his},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(e)
+        return Response(
+            {"status": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
     
 

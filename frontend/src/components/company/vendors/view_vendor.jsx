@@ -26,8 +26,11 @@ function View_vendor () {
               var company = res.data.company;
               var term = res.data.payment_term;
               var hist = res.data.history;
+              var cmt = res.data.comments;
+              
             }
             setVendor(vendor);
+            setComments(cmt);
             setCompany(company);
             setTerms(term);
             if (hist) {
@@ -41,11 +44,11 @@ function View_vendor () {
             viewvendor();
           },[])
    
-    $(document).ready(function ($) {
-        $(".table-row").click(function () {
-            window.document.location = $(this).data("href");
-        });
-    });
+    // $(document).ready(function ($) {
+    //     $(".table-row").click(function () {
+    //         window.document.location = $(this).data("href");
+    //     });
+    // });
     function overview() {
         document.getElementById('overview').style.display = 'block';
         document.getElementById('transaction').style.display = 'none';
@@ -53,16 +56,26 @@ function View_vendor () {
         document.getElementById('overviewBtn').style.backgroundColor='rgba(22,37,50,255)'
         document.getElementById('transactionBtn').style.backgroundColor='transparent';
         document.getElementById('statementBtn').style.backgroundColor='transparent';
-        $('#shareBtn').hide();
-        $('#printBtn').hide();
-        $('#pdfBtn').hide();
-        $('#editBtn').show();
-        $('#exportBtn').hide();
-        $('#deleteBtn').show();
-        $('#historyBtn').show();
-        $('#activeBtn').show();
-        $('#inactiveBtn').show();
-        $('#commentsBtn').show();
+        document.getElementById('shareBtn').style.display = 'none';
+        document.getElementById('printBtn').style.display = 'none';
+        document.getElementById('pdfBtn').style.display = 'none';
+        document.getElementById('editBtn').style.display = 'block';
+        document.getElementById('exportBtn').style.display = 'none';
+        document.getElementById('deleteBtn').style.display = 'block';
+        document.getElementById('historyBtn').style.display = 'block';
+        document.getElementById('statusBtn').style.display = 'block';
+
+        document.getElementById('commentsBtn').style.display = 'block';
+        // $('#shareBtn').hide();
+        // $('#printBtn').hide();
+        // $('#pdfBtn').hide();
+        // $('#editBtn').show();
+        // $('#exportBtn').hide();
+        // $('#deleteBtn').show();
+        // $('#historyBtn').show();
+        // $('#activeBtn').show();
+        // $('#inactiveBtn').show();
+        // $('#commentsBtn').show();
     }
     function transaction() {
         document.getElementById('overview').style.display = 'none';
@@ -71,16 +84,25 @@ function View_vendor () {
         document.getElementById('overviewBtn').style.backgroundColor='transparent';
         document.getElementById('statementBtn').style.backgroundColor='transparent';
         document.getElementById('transactionBtn').style.backgroundColor='rgba(22,37,50,255)';
-        $('#shareBtn').hide();
-        $('#printBtn').hide();
-        $('#pdfBtn').hide();
-        $('#editBtn').hide();
-        $('#exportBtn').show();
-        $('#deleteBtn').hide();
-        $('#historyBtn').hide();
-        $('#commentsBtn').hide();
-        $('#activeBtn').hide();
-        $('#inactiveBtn').hide();
+        document.getElementById('shareBtn').style.display = 'none';
+        document.getElementById('printBtn').style.display = 'none';
+        document.getElementById('pdfBtn').style.display = 'none';
+        document.getElementById('editBtn').style.display = 'none';
+        document.getElementById('exportBtn').style.display = 'block';
+        document.getElementById('deleteBtn').style.display = 'none';
+        document.getElementById('historyBtn').style.display = 'none';
+        document.getElementById('statusBtn').style.display = 'none';
+        document.getElementById('commentsBtn').style.display = 'none';
+        // $('#shareBtn').hide();
+        // $('#printBtn').hide();
+        // $('#pdfBtn').hide();
+        // $('#editBtn').hide();
+        // $('#exportBtn').show();
+        // $('#deleteBtn').hide();
+        // $('#historyBtn').hide();
+        // $('#commentsBtn').hide();
+        // $('#activeBtn').hide();
+        // $('#inactiveBtn').hide();
     }
     function statement() {
         document.getElementById('overview').style.display = 'none';
@@ -89,16 +111,25 @@ function View_vendor () {
         document.getElementById('overviewBtn').style.backgroundColor='transparent';
         document.getElementById('transactionBtn').style.backgroundColor='transparent';
         document.getElementById('statementBtn').style.backgroundColor='rgba(22,37,50,255)';
-        $('#printBtn').show();
-        $('#pdfBtn').show();
-        $('#shareBtn').show();
-        $('#deleteBtn').hide();
-        $('#editBtn').hide();
-        $('#exportBtn').hide();
-        $('#historyBtn').hide();
-        $('#commentsBtn').hide();
-        $('#activeBtn').hide();
-        $('#inactiveBtn').hide();
+        document.getElementById('shareBtn').style.display = 'block';
+        document.getElementById('printBtn').style.display = 'block';
+        document.getElementById('pdfBtn').style.display = 'block';
+        document.getElementById('editBtn').style.display = 'none';
+        document.getElementById('exportBtn').style.display = 'none';
+        document.getElementById('deleteBtn').style.display = 'none';
+        document.getElementById('historyBtn').style.display = 'none';
+        document.getElementById('statusBtn').style.display = 'none';
+        document.getElementById('commentsBtn').style.display = 'none';
+        // $('#printBtn').show();
+        // $('#pdfBtn').show();
+        // $('#shareBtn').show();
+        // $('#deleteBtn').hide();
+        // $('#editBtn').hide();
+        // $('#exportBtn').hide();
+        // $('#historyBtn').hide();
+        // $('#commentsBtn').hide();
+        // $('#activeBtn').hide();
+        // $('#inactiveBtn').hide();
     }
     const Change_vendor_status = async (id,status) =>{
         try{
@@ -278,7 +309,7 @@ function View_vendor () {
       
                   Toast.fire({
                     icon: "success",
-                    title: "Item Deleted successfully",
+                    title: "Vendor Deleted successfully",
                   });
                   navigate("/vendors");
                 })
@@ -293,10 +324,11 @@ function View_vendor () {
         e.preventDefault();
         var cmt = {
           Id: ID,
+          id:id,
           comments: comment,
         };
         axios
-          .post(`${config.base_url}/add_item_comment/`, cmt)
+          .post(`${config.base_url}/add_vendor_comment/`, cmt)
           .then((res) => {
             console.log(res);
             if (res.data.status) {
@@ -304,9 +336,12 @@ function View_vendor () {
                 icon: "success",
                 title: "Comment Added",
               });
-              setComment("");
+              console.log('comment',res.data.data);
+              setComments("");
+              
               viewvendor();
             }
+            
           })
           .catch((err) => {
             console.log("ERROR=", err);
@@ -318,37 +353,38 @@ function View_vendor () {
             }
           });
       };
-      function deleteComment(id) {
-        Swal.fire({
-          title: "Delete Comment?",
-          text: "Are you sure you want to delete this.!",
-          icon: "warning",
-          showCancelButton: true,
-          cancelButtonColor: "#3085d6",
-          confirmButtonColor: "#d33",
-          confirmButtonText: "Delete",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            axios
-              .delete(`${config.base_url}/delete_item_comment/${id}/`)
-              .then((res) => {
-                console.log(res);
+      // function deleteComment(id) {
+      //   Swal.fire({
+      //     title: "Delete Comment?",
+      //     text: "Are you sure you want to delete this.!",
+      //     icon: "warning",
+      //     showCancelButton: true,
+      //     cancelButtonColor: "#3085d6",
+      //     confirmButtonColor: "#d33",
+      //     confirmButtonText: "Delete",
+      //   }).then((result) => {
+      //     if (result.isConfirmed) {
+      //       axios
+      //         .delete(`${config.base_url}/delete_item_comment/${id}/`)
+      //         .then((res) => {
+      //           console.log(res);
     
-                Toast.fire({
-                  icon: "success",
-                  title: "Comment Deleted",
-                });
-                viewvendor();
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }
-        });
-      }
-      const handleclick = async () =>{
+      //           Toast.fire({
+      //             icon: "success",
+      //             title: "Comment Deleted",
+      //           });
+      //           viewvendor();
+      //         })
+      //         .catch((err) => {
+      //           console.log(err);
+      //         });
+      //     }
+      //   });
+      // }
+      
+      const handleclick = async (id) =>{
         try{
-          navigate(`/vendor_history`);
+          navigate(`/vendor_history/${id}/`);
         } catch (error) {
           console.log('none....')
         }
@@ -375,9 +411,9 @@ function View_vendor () {
                         </div> 
                         <div className="col-md-6 d-flex justify-content-end">
                         {vendor.status == 'Active' ? (
-                            <a className="ml-2 fa fa-check-circle btn btn-outline-secondary text-grey" role="button" style={{height:'30px',width:'100px'}} id="inactiveBtn" onClick={() => Change_vendor_status(vendor.id,'Inactive')}>&nbsp;Active</a> 
+                            <a className="ml-2 fa fa-check-circle btn btn-outline-secondary text-grey" role="button" style={{height:'30px',width:'100px'}} id="statusBtn" onClick={() => Change_vendor_status(vendor.id,'Inactive')}>&nbsp;Active</a> 
                         ): (
-                            <a className="ml-2 fa fa-ban btn btn-outline-secondary text-grey" role="button" style={{height:'30px',width:'100px'}} id="activeBtn" onClick={() => Change_vendor_status(vendor.id,'Active')}>&nbsp;Inactive</a>   
+                            <a className="ml-2 fa fa-ban btn btn-outline-secondary text-grey" role="button" style={{height:'30px',width:'100px'}} id="statusBtn" onClick={() => Change_vendor_status(vendor.id,'Active')}>&nbsp;Inactive</a>   
                         )}
                         <a className="ml-2 btn btn-outline-secondary text-grey fa fa-table" role="button" id="exportBtn" style={{display:'none',height:'30px',width:'100px'}} onClick={() =>exportToExcel()}>&nbsp;Export</a>
                             <a className="ml-2 btn btn-outline-secondary text-grey fa fa-file" role="button" id="pdfBtn" style={{display:'none',height:'30px',width:'100px'}} onClick={vendorTransactionPdf}> &nbsp;PDF</a> 
@@ -440,7 +476,7 @@ function View_vendor () {
                         <a class="ml-2 fa fa-pencil btn btn-outline-secondary text-grey" id="editBtn" role="button" style={{height:'30px',width:'100px'}} onClick={() =>EditVendor(vendor.id)}>&nbsp;Edit</a>
                         <a class="ml-2 btn btn-outline-secondary text-grey fa fa-trash" id="deleteBtn" role="button"  style={{height:'30px',width:'100px'}} onClick={() =>DeleteVendor(vendor.id)}>&nbsp;Delete</a>
                         <a href="#"  class="ml-2 btn btn-outline-secondary text-grey fa fa-comments" id="commentsBtn" role="button" data-toggle="modal" data-target="#commentModal" style={{height:'30px',width:'100px'}}>&nbsp;Comment</a>
-                        <a class="ml-2 btn btn-outline-secondary text-grey fa fa-history" id="historyBtn" role="button" style={{height:'30px',width:'100px'}} onClick={() => handleclick()}>&nbsp;History</a>
+                        <a class="ml-2 btn btn-outline-secondary text-grey fa fa-history" id="historyBtn" role="button" style={{height:'30px',width:'100px'}} onClick={() => handleclick(vendor.id)}>&nbsp;History</a>
 
                             {/* {% if vendor.status == 'Inactive' %} */}
                             {/* <a href="{% url 'Fin_changeVendorStatus' vendor.id 'Active' %}" id="activeBtn" class="ml-2 fa fa-ban btn btn-outline-secondary text-grey" role="button" >&nbsp;Inactive</a> */}
@@ -779,7 +815,7 @@ function View_vendor () {
                                         No Credit Limit Set
                                     {% endif %} */}
                                     {vendor.Credit_limit !=0 ? (
-                                        <strong>{ vendor.Credit_limit }</strong>
+                                        <strong>Credit Limit: { vendor.Credit_limit }</strong>
                                     ):(
                                         <h3>No Credit Limit Set</h3>
                                     )}
@@ -813,7 +849,7 @@ function View_vendor () {
                                     <th>#</th>
                                     <th className="filterTable-column">Type
                                         <span className="dropdown">
-                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuType" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style={{width:'50px'}}>
                                                 <i className="fa fa-filter" style={{fontSize:'1rem'}}></i>
                                             </button>
                                             <div className="dropdown-menu p-2" aria-labelledby="dropdownMenuType">
@@ -830,7 +866,7 @@ function View_vendor () {
                                     </th>
                                     <th className="filterTable-column">Number
                                         <span className="dropdown">
-                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuNumber" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuNumber" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style={{width:'50px'}}>
                                                 <i className="fa fa-filter" style={{fontSize:'1rem'}}></i>
                                             </button>
                                             <div className="dropdown-menu p-2" aria-labelledby="dropdownMenuNumber">
@@ -848,7 +884,7 @@ function View_vendor () {
 
                                     <th className="filterTable-column">Date
                                         <span className="dropdown">
-                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuDate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuDate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style={{width:'50px'}}>
                                                 <i className="fa fa-filter" style={{fontSize:'1rem'}}></i>
                                             </button>
                                             <div className="dropdown-menu p-2" aria-labelledby="dropdownMenuDate">
@@ -866,7 +902,7 @@ function View_vendor () {
                                     
                                     <th className="filterTable-column">Total
                                         <span className="dropdown">
-                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuTotal" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuTotal" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style={{width:'50px'}}>
                                                 <i className="fa fa-filter" style={{fontSize:'1rem'}}></i>
                                             </button>
                                             <div className="dropdown-menu p-2" aria-labelledby="dropdownMenuTotal">
@@ -884,7 +920,7 @@ function View_vendor () {
 
                                     <th className="filterTable-column">Balance
                                         <span className="dropdown">
-                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuBalance" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <button className="btn dropdown-toggle text-white" type="button" id="dropdownMenuBalance" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style={{width:'50px'}}>
                                                 <i className="fa fa-filter" style={{fontSize:'1rem'}}></i>
                                             </button>
                                             <div className="dropdown-menu p-2" aria-labelledby="dropdownMenuBalance">
@@ -1035,10 +1071,10 @@ function View_vendor () {
                                                                                 <th >{{BALANCE}}</th>
                                                                             </tr>  */}
                                                                             <tr style={{padding:'1.2rem 0.5rem'}}>
-                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
+                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}>{vendor.Date}</td>
                                                                             <td style={{padding:'1.2rem 0.5rem',color:'black',fontFamily:'monospace'}}><strong>Opening Balance</strong></td>
                                                                             <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
-                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}>{vendor.Date}</td>
+                                                                            <td style={{padding:'1.2rem 0.5rem',color:'black'}}></td>
                                                                             <td style={{padding:'1.2rem 0.5rem',color:'black'}}>{vendor.Opening_balance}</td>
                                                                             </tr>
                                                                         </tbody>
@@ -1062,6 +1098,94 @@ function View_vendor () {
         </div>
     </div>
 </div>
+
+
+     <div
+        className="modal fade"
+        id="commentModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content" style={{ backgroundColor: "#213b52" }}>
+            <div className="modal-header">
+              <h3 className="modal-title" id="exampleModalLabel">
+                Add Comments
+              </h3>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <form onSubmit={saveItemComment} className="px-1">
+              <div className="modal-body w-100">
+                <textarea
+                  type="text"
+                  className="form-control"
+                  name="comment"
+                  value={comment}
+                  required
+                  onChange={(e) => setComment(e.target.value)}
+                />
+                {comments.length > 0 ? (
+                  <div className="container-fluid">
+                    <table className="table mt-4">
+                      <thead>
+                        <tr>
+                          <th className="text-center">sl no.</th>
+                          <th className="text-center">Comment</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comments.map((c, index) => (
+                          <tr className="table-row">
+                            <td className="text-center">{index + 1}</td>
+                            <td className="text-center">{c.comments}</td>
+                            
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <span className="my-2 font-weight-bold d-flex justify-content-center">
+                    No Comments.!
+                  </span>
+                )}
+              </div>
+
+              <div className="modal-footer w-100">
+                <button
+                  type="button"
+                  style={{ width: "fit-content", height: "fit-content" }}
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  style={{ width: "fit-content", height: "fit-content" }}
+                  className="btn"
+                  id="commentSaveBtn"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>        
+
+
+
 <div className="modal fade" id="shareToEmail">
         <div className="modal-dialog modal-lg">
           <div className="modal-content" style={{ backgroundColor: "#213b52" }}>
@@ -1127,103 +1251,10 @@ function View_vendor () {
           </div>
         </div>
       </div>
-      <div
-        className="modal fade"
-        id="commentModal"
-        tabindex="-1"
-        role="dialog"
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-lg" role="document">
-          <div className="modal-content" style={{ backgroundColor: "#213b52" }}>
-            <div className="modal-header">
-              <h3 className="modal-title" id="exampleModalLabel">
-                Add Comments
-              </h3>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
 
-            <form onSubmit={saveItemComment} className="px-1">
-              <div className="modal-body w-100">
-                <textarea
-                  type="text"
-                  className="form-control"
-                  name="comment"
-                  value={comment}
-                  required
-                  onChange={(e) => setComment(e.target.value)}
-                />
-                {comments.length > 0 ? (
-                  <div className="container-fluid">
-                    <table className="table mt-4">
-                      <thead>
-                        <tr>
-                          <th className="text-center">sl no.</th>
-                          <th className="text-center">Comment</th>
-                          <th className="text-center">Delete</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {comments.map((c, index) => (
-                          <tr className="table-row">
-                            <td className="text-center">{index + 1}</td>
-                            <td className="text-center">{c.comments}</td>
-                            <td className="text-center">
-                              <a
-                                className="text-danger"
-                                onClick={() => deleteComment(`${c.id}`)}
-                              >
-                                <i
-                                  className="fa fa-trash"
-                                  style={{
-                                    fontSize: "1.1rem",
-                                    cursor: "pointer",
-                                  }}
-                                ></i>
-                              </a>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <span className="my-2 font-weight-bold d-flex justify-content-center">
-                    No Comments.!
-                  </span>
-                )}
-              </div>
 
-              <div className="modal-footer w-100">
-                <button
-                  type="button"
-                  style={{ width: "fit-content", height: "fit-content" }}
-                  className="btn btn-secondary"
-                  data-dismiss="modal"
-                >
-                  Close
-                </button>
-                <button
-                  type="submit"
-                  style={{ width: "fit-content", height: "fit-content" }}
-                  className="btn"
-                  id="commentSaveBtn"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>        
+
+      
                                     
                        
                         

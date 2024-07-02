@@ -425,3 +425,8 @@ class Fin_Vendor_History(models.Model):
         ('Edited', 'Edited'),
     )
     Action = models.CharField(max_length=30,null=True,choices=Action_choices)
+
+class Fin_Vendor_Comments(models.Model):
+    Company = models.ForeignKey(Fin_Company_Details,on_delete=models.CASCADE,null=True)
+    Vendor = models.ForeignKey(Fin_Vendor,on_delete=models.CASCADE,null=True)
+    comments = models.CharField(max_length=200,null=True)

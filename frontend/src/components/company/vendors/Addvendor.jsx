@@ -500,27 +500,27 @@ function Addvendor () {
         }
       }
     
-        $(document).on("change", "#openbalance", function () {
-         openbal = $("#openbalance").val();
-          if ($("#bal").val() == "credit") {
-            if (openbal.slice(0, 1) != "-") {
-              if (parseFloat(openbal) != 0) {
-                document.getElementById("openbalance").value = "-" + openbal;
-              } else {
-                document.getElementById("openbalance").value = openbal;
-              }
-            } else {
-              if (parseFloat(openbal) != 0) {
-                document.getElementById("openbalance").value = openbal;
-              } else {
-                document.getElementById("openbalance").value =
-                  -1 * parseFloat(openbal);
-              }
-            }
-          } else {
-            document.getElementById("openbalance").value = openbal;
-          }
-        });
+        // $(document).on("change", "#openbalance", function () {
+        //  openbal = $("#openbalance").val();
+        //   if ($("#bal").val() == "credit") {
+        //     if (openbal.slice(0, 1) != "-") {
+        //       if (parseFloat(openbal) != 0) {
+        //         document.getElementById("openbalance").value = "-" + openbal;
+        //       } else {
+        //         document.getElementById("openbalance").value = openbal;
+        //       }
+        //     } else {
+        //       if (parseFloat(openbal) != 0) {
+        //         document.getElementById("openbalance").value = openbal;
+        //       } else {
+        //         document.getElementById("openbalance").value =
+        //           -1 * parseFloat(openbal);
+        //       }
+        //     }
+        //   } else {
+        //     document.getElementById("openbalance").value = openbal;
+        //   }
+        // });
     
       function setOpeningBalanceValue(value){
     

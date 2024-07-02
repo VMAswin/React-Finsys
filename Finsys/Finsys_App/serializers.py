@@ -92,3 +92,13 @@ class VendorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Fin_Vendor
         fields = '__all__'
+
+class VendorHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fin_Vendor_History
+        fields = '__all__'
+
+class VendorCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fin_Vendor_Comments
+        fields = '__all__'

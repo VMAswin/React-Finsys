@@ -103,5 +103,7 @@ urlpatterns = [
     path('get_vendor_details/<int:id>/<int:ID>/',Fin_get_vendor_details),
     path('update_vendor/',Fin_update_vendor),
     path('delete_vendor/<int:id>/',Fin_delete_vendor),
+    path('add_vendor_comment/',Fin_add_vendor_comment),
+    path('fetch_vendor_history/<int:id>/',Fin_fetch_vendor_history)
 
 ]

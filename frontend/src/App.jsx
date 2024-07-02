@@ -129,7 +129,7 @@ function App() {
             <Route path="/add_vendor" element={<Addvendor/>} />
             <Route path="/view_vendor/:id/" element={<View_vendor />} />
             <Route path="/edit_vendor/:id/" element={<Edit_vendor />} />
-            <Route path="/vendor_history" element={<Vendorhistory />} />
+            <Route path="/vendor_history/:id/" element={<Vendorhistory />} />
           </Route>
         </Routes>
       </BrowserRouter>
