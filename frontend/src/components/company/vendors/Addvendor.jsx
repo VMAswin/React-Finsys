@@ -222,6 +222,16 @@ function Addvendor () {
           document.getElementById("shippinco").value = document.getElementById("pinco").value;
           document.getElementById("shipcountry").value = document.getElementById("country").value;
           document.getElementById("shipState").value = document.getElementById("state").value;
+          var ss = document.getElementById("shipstreet").value;
+          setSStreet(ss);
+          var sc = document.getElementById("shipcity").value;
+          setSCity(sc);
+          var sp = document.getElementById("shippinco").value;
+          setSPincode(sp);
+          var sco = document.getElementById("shipcountry").value;
+          setSCountry(sco);
+          var sst = document.getElementById("shipState").value;
+          setSState(sst);
         } else {
           document.getElementById("shipstreet").value = "";
           document.getElementById("shipcity").value = "";
@@ -500,27 +510,6 @@ function Addvendor () {
         }
       }
     
-        // $(document).on("change", "#openbalance", function () {
-        //  openbal = $("#openbalance").val();
-        //   if ($("#bal").val() == "credit") {
-        //     if (openbal.slice(0, 1) != "-") {
-        //       if (parseFloat(openbal) != 0) {
-        //         document.getElementById("openbalance").value = "-" + openbal;
-        //       } else {
-        //         document.getElementById("openbalance").value = openbal;
-        //       }
-        //     } else {
-        //       if (parseFloat(openbal) != 0) {
-        //         document.getElementById("openbalance").value = openbal;
-        //       } else {
-        //         document.getElementById("openbalance").value =
-        //           -1 * parseFloat(openbal);
-        //       }
-        //     }
-        //   } else {
-        //     document.getElementById("openbalance").value = openbal;
-        //   }
-        // });
     
       function setOpeningBalanceValue(value){
     
@@ -639,6 +628,7 @@ function Addvendor () {
                     className="form-control"
                     id="location"
                     name="location"
+                    required
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     style={{ backgroundColor: "#43596c", color: "white" }}
@@ -668,7 +658,6 @@ function Addvendor () {
                     type="text"
                     className="form-control"
                     id="custWebsite"
-                    required
                     placeholder="www.finsys.com"
                     value={website}
                     onChange={(e) => handleWebSite(e.target.value)}
@@ -863,8 +852,8 @@ function Addvendor () {
                     onChange={(e) => setCurrency(e.target.value)}
                     className="form-control"
                   >
-                    <option value="Mr">INR - Indian Rupee</option>
-                    <option value="Mrs">$ - Dollar</option>
+                    <option value="INR - Indian Rupee">INR - Indian Rupee</option>
+                    <option value="$ - Dollar">$ - Dollar</option>
                   </select>
                   <div className="valid-feedback">Looks good!</div>
                 </div>

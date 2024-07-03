@@ -755,10 +755,24 @@ function View_vendor () {
                                 <h6 className="">GST Type</h6>
                                 { vendor.GST_Treatment }
                             </div>
-                            <div className="d-flex justify-content-between mb-4">
+                            <div className="col-md-4">
+                                <p>
+                                    {vendor.GST_Treatment == 'Unregistered Business' ? (
+                                        <h6 className=""></h6>
+                                    ) : (
+                                        
+                                    <h6 className="" style={{position:'relative',right:'15px'}}>GSTIN {vendor.GST_Number}</h6>
+                                     )}
+                                </p>
+
+                            </div>
+
+                            {/* <div className="d-flex justify-content-between mb-4">
                                 <h6 className="">GSTIN</h6>
                                 { vendor.GST_Number}
-                            </div>
+                            </div> */}
+                            
+                            
                             <div className="d-flex justify-content-between mb-4">
                                 <h6 className="">PAN</h6>
                                 { vendor.Pan_Number}
